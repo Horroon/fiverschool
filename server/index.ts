@@ -53,18 +53,7 @@ app.get('/api/order/update/:orderId', (req, res)=>{
 
 		allOrders = updatedOrders
 		res.send({status: 200, message:'Successfully updated', orders: allOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)})
-		// fs.writeFile(orderFilePath, JSON.stringify(updatedOrders, null, '2'), "utf8", err => {
-		// 	if (err) {
-		// 	  throw err;
-		// 	}
-		// 	console.log('done')
-		// 	res.send('done')
-		//   });
-		// })
-		// var newJSON = JSON.stringify(updatedOrders);
-		// fs.writeFile(orderFilePath, newJSON, function(err) {
-		//   res.send('done')
-		// });
+		
 })
 
 app.listen(PORT);

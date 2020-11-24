@@ -1,28 +1,28 @@
 import React from 'react';
 import './App.scss';
-import {createApiClient, Order} from './api';
-import {OrderModal} from './models'
+import { createApiClient, Order } from './api';
+import { OrderModal } from './models'
 
 export type AppState = {
 	orders?: Order[],
 	search: string;
-	selectedOrder:{
-			image:string,
-			billingInfo: { status: string }
-			createdDate: string,
-			currency: string,
-			customer: {
-			  id: string,
-			  name: string
-			}
-			fulfillmentStatus: string,
-			id: number
-			itemQuantity: number
-			items: any[]
-			price: {
-			  formattedTotalPrice: string,
-			  total: number
-			}
+	selectedOrder: {
+		image: string,
+		billingInfo: { status: string }
+		createdDate: string,
+		currency: string,
+		customer: {
+			id: string,
+			name: string
+		}
+		fulfillmentStatus: string,
+		id: number
+		itemQuantity: number
+		items: any[]
+		price: {
+			formattedTotalPrice: string,
+			total: number
+		}
 	}
 }
 
@@ -38,18 +38,18 @@ export class App extends React.PureComponent<{}, AppState> {
 			createdDate: '',
 			currency: '',
 			customer: {
-			  id: '',
-			  name: ''
+				id: '',
+				name: ''
 			},
 			fulfillmentStatus: '',
 			id: 0,
 			itemQuantity: 0,
 			items: [],
 			price: {
-			  formattedTotalPrice: '',
-			  total: 0
+				formattedTotalPrice: '',
+				total: 0
 			}
-	}
+		}
 	};
 
 	searchDebounce: any = null;
@@ -70,34 +70,34 @@ export class App extends React.PureComponent<{}, AppState> {
 			});
 		}, 300);
 	};
-   
-	update_item_status = async(id:string)=>{
-		try{
-			const response:any = await api.updateOrderStatus(id,'not-fulfilled').then(res=>res)
+
+	update_item_status = async (id: string, status:string) => {
+		try {
+			const response: any = await api.updateOrderStatus(id, status).then(res => res)
 			console.log('response ', response)
-			this.setState({orders: response.data.orders})
-		}catch(e){
+			this.setState({ orders: response.data.orders })
+		} catch (e) {
 			console.log('error ', e)
 		}
-		
+
 	}
 
-	modalOpen = (order:any)=>{
+	modalOpen = (order: any) => {
 		order.image = "https://source.unsplash.com/1600x900/?nutrition,food"
-		this.setState({selectedOrder: order})
+		this.setState({ selectedOrder: order })
 		const modalButton = document.getElementById('modalButton');
-		if(modalButton){
+		if (modalButton) {
 			modalButton.click()
 		}
 	}
 	render() {
-		const {orders} = this.state;
+		const { orders } = this.state;
 		console.log('orders', orders)
 		return (
 			<main>
 				<h1>Orders</h1>
 				<header>
-					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)}/>
+					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 				</header>
 				{orders ? <div className='results'>Showing {orders.length} results</div> : null}
 				{orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
@@ -112,16 +112,16 @@ export class App extends React.PureComponent<{}, AppState> {
 
 		return (
 			<div className='orders'>
-			
-			<button style={{display:'none'}} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-      			Launch demo modal
+
+				<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
+					Launch demo modal
 			</button>
 				<OrderModal order={this.state.selectedOrder} />
 				{filteredOrders.map((order) => (
-					<div className={'orderCard'} onClick={(e)=>{
+					<div className={'orderCard'} onClick={(e) => {
 						e.stopPropagation()
-						 this.modalOpen(order)
-						}}>
+						this.modalOpen(order)
+					}}>
 						<div className={'generalData'}>
 							<h6>{order.id}</h6>
 							<h4>{order.customer.name}</h4>
@@ -129,20 +129,31 @@ export class App extends React.PureComponent<{}, AppState> {
 						</div>
 						<div className={'fulfillmentData'}>
 							<h4>{order.itemQuantity} Items</h4>
-							<img src={App.getAssetByStatus(order.fulfillmentStatus)}/>
+							<img src={App.getAssetByStatus(order.fulfillmentStatus)} />
 							{order.fulfillmentStatus !== 'canceled' &&
-								<a onClick={(e)=>{
+								<a onClick={(e) => {
 									e.stopPropagation()
-									order.fulfillmentStatus === 'fulfilled' && this.update_item_status(order.id.toString())
+									order.fulfillmentStatus === 'fulfilled' ? this.update_item_status(order.id.toString(), 'not-fulfilled'):this.update_item_status(order.id.toString(), 'fulfilled')
 								}}>Mark as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
 							}
 						</div>
 						<div className={'paymentData'}>
 							<h4>{order.price.formattedTotalPrice}</h4>
-							<img src={App.getAssetByStatus(order.billingInfo.status)}/>
+							<img src={App.getAssetByStatus(order.billingInfo.status)} />
 						</div>
 					</div>
 				))}
+
+			<div className="toast" data-autohide="false">
+				<div className="toast-header">
+					<strong className="mr-auto text-primary">Toast Header</strong>
+					<small className="text-muted">5 mins ago</small>
+					<button type="button" className="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
+				</div>
+				<div className="toast-body">
+					Some text inside the toast body
+				</div>
+				</div>
 			</div>
 		)
 	};
