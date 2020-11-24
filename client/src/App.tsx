@@ -108,10 +108,14 @@ export class App extends React.PureComponent<{}, AppState> {
 	filterDeliverOrNot = (status: delivererdStatus)=>{
 		const {checkboxes} = this.state
 		checkboxes[status] = !this.state.checkboxes[status]
-		this.setState({checkboxes:{...checkboxes}})
+		if(checkboxes.Delivered || checkboxes.notdelivered){
+			this.setState({checkboxes:{...checkboxes}});
+		}else{
+			toast.error('Please keep one selected')
+		}
 	}
 	render() {
-		const { orders ,checkboxes} = this.state;
+		const { orders } = this.state;
 		return (
 			<main>
 				<h1>Orders</h1>
@@ -121,14 +125,14 @@ export class App extends React.PureComponent<{}, AppState> {
 				{orders ? <div className='results'>Showing {orders.length} results 
 					<div className="check-boxes">
 						<div>
-							<label htmlFor="delivered">Delivered</label> &nbsp;&nbsp;
-							<input type="checkbox" name="devlivered" id="deliver" value="Delivered" checked={this.state.checkboxes.Delivered ? true:false} onClick={()=>{
+							<label htmlFor="delivered">All</label> &nbsp;&nbsp;
+							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true:false} onClick={()=>{
 								this.filterDeliverOrNot(delivererdStatus.Delivered)
 							}} />
 						</div>
 						&nbsp;&nbsp;
 						<div>
-							<label htmlFor="notdelivered">Not delivered</label>&nbsp;&nbsp;
+							<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
 							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ?true:false} onClick={(e)=>{
 								this.filterDeliverOrNot(delivererdStatus.notdelivered)
 							}} />
@@ -142,6 +146,8 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	renderOrders = (orders: Order[]) => {
+		const fulfilled = this.state.checkboxes.Delivered?"fulfilled": this.state.checkboxes.notdelivered ? 'not-fulfilled':'both'
+		const both  = this.state.checkboxes.Delivered && this.state.checkboxes.notdelivered;
 		const filteredOrders = orders
 			.filter((order) =>(
 			(order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) 
@@ -149,6 +155,8 @@ export class App extends React.PureComponent<{}, AppState> {
 			(order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase())
 			||
 			(order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase())
+			&&
+			!both ? (order.fulfillmentStatus.toLowerCase()).includes(fulfilled.toLowerCase()):''
 			));
 
 		return (

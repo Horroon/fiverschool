@@ -40,7 +40,7 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
                   <input type="text" className="form-control" id="validationCustom01" placeholder="First name" value={order.currency} disabled />
                 </div>
                 <div className="col-md-6 mb-4 mt-4">
-                  <label >Quantity</label>
+                  <label >Total Quantity</label>
                   <input type="text" className="form-control" id="validationCustom02" placeholder="Last name" value={order.itemQuantity} disabled />
                 </div>
                 <div className="col-md-12 mb-4">
@@ -56,6 +56,21 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
                   <label>Total Price</label>
                   <input type="text" className="form-control" id="date" placeholder="Date" value={order.price.total} disabled />
                 </div>
+                {
+                  order.items.map((quantity,i)=>{
+                    return <> 
+                         <div className="col-md-6 mb-6 mt-10">
+                            <label>Item Name</label>
+                            <input type="text" className="form-control" id="date" placeholder="Date" value={quantity.id} disabled />
+                        </div>
+                        
+                        <div className="col-md-6 mb-6 mt-10">
+                            <label>Quantity</label>
+                            <input type="text" className="form-control" id="date" placeholder="Date" value={quantity.quantity} disabled />
+                        </div>
+                        </>
+                  })
+                }
               </div>
             </form>
 
