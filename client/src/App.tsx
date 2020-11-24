@@ -75,7 +75,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		try{
 			const response:any = await api.updateOrderStatus(id,'not-fulfilled').then(res=>res)
 			console.log('response ', response)
-			this.setState({orders: response.data.data})
+			this.setState({orders: response.data.orders})
 		}catch(e){
 			console.log('error ', e)
 		}
@@ -92,6 +92,7 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 	render() {
 		const {orders} = this.state;
+		console.log('orders', orders)
 		return (
 			<main>
 				<h1>Orders</h1>
