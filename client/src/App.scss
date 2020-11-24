@@ -16,8 +16,14 @@ body {
 		color: #7a92a5;
 		font-size: 14px;
 		margin: 12px 5px;
+		justify-content: space-between;
+		display: flex
 	}
-
+	.check-boxes{
+		width: 25%;
+		display: flex;
+		justify-content: space-between;
+	}
 	header {
 		width: 1000px;
 		border-radius: 6px;

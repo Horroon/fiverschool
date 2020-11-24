@@ -25,9 +25,17 @@ export type AppState = {
 			formattedTotalPrice: string,
 			total: number
 		}
+	},
+	checkboxes: {
+		Delivered: boolean,
+		notdelivered: boolean,
 	}
 }
 
+enum delivererdStatus{
+	Delivered = 'Delivered',
+	notdelivered ='notdelivered'
+}
 const api = createApiClient();
 
 export class App extends React.PureComponent<{}, AppState> {
@@ -51,6 +59,10 @@ export class App extends React.PureComponent<{}, AppState> {
 				formattedTotalPrice: '',
 				total: 0
 			}
+		},
+		checkboxes:{
+			Delivered: true,
+			notdelivered: true,
 		}
 	};
 
@@ -92,32 +104,56 @@ export class App extends React.PureComponent<{}, AppState> {
 			modalButton.click()
 		}
 	}
+
+	filterDeliverOrNot = (status: delivererdStatus)=>{
+		const {checkboxes} = this.state
+		checkboxes[status] = !this.state.checkboxes[status]
+		this.setState({checkboxes:{...checkboxes}})
+	}
 	render() {
-		const { orders } = this.state;
-		console.log('orders', orders)
+		const { orders ,checkboxes} = this.state;
 		return (
 			<main>
 				<h1>Orders</h1>
 				<header>
 					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 				</header>
-				{orders ? <div className='results'>Showing {orders.length} results</div> : null}
+				{orders ? <div className='results'>Showing {orders.length} results 
+					<div className="check-boxes">
+						<div>
+							<label htmlFor="delivered">Delivered</label> &nbsp;&nbsp;
+							<input type="checkbox" name="devlivered" id="deliver" value="Delivered" checked={this.state.checkboxes.Delivered ? true:false} onClick={()=>{
+								this.filterDeliverOrNot(delivererdStatus.Delivered)
+							}} />
+						</div>
+						&nbsp;&nbsp;
+						<div>
+							<label htmlFor="notdelivered">Not delivered</label>&nbsp;&nbsp;
+							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ?true:false} onClick={(e)=>{
+								this.filterDeliverOrNot(delivererdStatus.notdelivered)
+							}} />
+						</div>
+					</div>
+				</div> : null}
 				{orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
-
+				
 			</main>
 		)
 	}
 
 	renderOrders = (orders: Order[]) => {
 		const filteredOrders = orders
-			.filter((order) => (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()));
+			.filter((order) =>(
+			(order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) 
+			|| 
+			(order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase())
+			||
+			(order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase())
+			));
 
 		return (
 			<div className='orders'>
-
-				<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">
-					Launch demo modal
-			</button>
+				<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></button>
 				<OrderModal order={this.state.selectedOrder} />
 				{filteredOrders.map((order) => (
 					<div className={'orderCard'} onClick={(e) => {
