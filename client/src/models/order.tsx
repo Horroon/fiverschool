@@ -43,7 +43,7 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
                   <label >Quantity</label>
                   <input type="text" className="form-control" id="validationCustom02" placeholder="Last name" value={order.itemQuantity} disabled />
                 </div>
-                <div className="col-md-6 mb-4">
+                <div className="col-md-12 mb-4">
                   <label>Date</label>
                   <input type="text" className="form-control" id="date" placeholder="Date" value={new Date(order.createdDate).toLocaleString()} disabled />
                 </div>
