@@ -17,5 +17,8 @@
   "devDependencies": {
     "concurrently": "^5.2.0",
     "lerna": "^3.13.1"
+  },
+  "dependencies": {
+    "react-toastify": "^6.1.0"
   }
 }

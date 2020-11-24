@@ -1,4 +1,6 @@
 import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.scss';
 import { createApiClient, Order } from './api';
 import { OrderModal } from './models'
@@ -74,10 +76,10 @@ export class App extends React.PureComponent<{}, AppState> {
 	update_item_status = async (id: string, status:string) => {
 		try {
 			const response: any = await api.updateOrderStatus(id, status).then(res => res)
-			console.log('response ', response)
+			toast.success(response.data.message)
 			this.setState({ orders: response.data.orders })
 		} catch (e) {
-			console.log('error ', e)
+			toast.error("Something went wrong!")
 		}
 
 	}
@@ -143,17 +145,7 @@ export class App extends React.PureComponent<{}, AppState> {
 						</div>
 					</div>
 				))}
-
-			<div className="toast" data-autohide="false">
-				<div className="toast-header">
-					<strong className="mr-auto text-primary">Toast Header</strong>
-					<small className="text-muted">5 mins ago</small>
-					<button type="button" className="ml-2 mb-1 close" data-dismiss="toast">&times;</button>
-				</div>
-				<div className="toast-body">
-					Some text inside the toast body
-				</div>
-				</div>
+			 <ToastContainer />
 			</div>
 		)
 	};
