@@ -31,15 +31,15 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
           </div>
           <div className="modal-body">
             <div className="container my-30 px-0">
-              <img src={order.image} className="image" height={200} width={'100%'} />
+              <img src={order.image} className="image image-border"  height={200} width={'100%'} />
             </div>
             <form className="needs-validation">
               <div className="form-row">
-                <div className="col-md-6 mb-4">
+                <div className="col-md-6 mb-4 mt-4">
                   <label>currency</label>
                   <input type="text" className="form-control" id="validationCustom01" placeholder="First name" value={order.currency} disabled />
                 </div>
-                <div className="col-md-6 mb-4">
+                <div className="col-md-6 mb-4 mt-4">
                   <label >Quantity</label>
                   <input type="text" className="form-control" id="validationCustom02" placeholder="Last name" value={order.itemQuantity} disabled />
                 </div>
