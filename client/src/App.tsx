@@ -32,9 +32,9 @@ export type AppState = {
 	}
 }
 
-enum delivererdStatus{
+enum delivererdStatus {
 	Delivered = 'Delivered',
-	notdelivered ='notdelivered'
+	notdelivered = 'notdelivered'
 }
 const api = createApiClient();
 
@@ -60,7 +60,7 @@ export class App extends React.PureComponent<{}, AppState> {
 				total: 0
 			}
 		},
-		checkboxes:{
+		checkboxes: {
 			Delivered: true,
 			notdelivered: true,
 		}
@@ -85,7 +85,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		}, 300);
 	};
 
-	update_item_status = async (id: string, status:string) => {
+	update_item_status = async (id: string, status: string) => {
 		try {
 			const response: any = await api.updateOrderStatus(id, status).then(res => res)
 			toast.success(response.data.message)
@@ -105,15 +105,29 @@ export class App extends React.PureComponent<{}, AppState> {
 		}
 	}
 
-	filterDeliverOrNot = (status: delivererdStatus)=>{
-		const {checkboxes} = this.state
+	filterDeliverOrNot = (status: delivererdStatus) => {
+		const { checkboxes } = this.state
 		checkboxes[status] = !this.state.checkboxes[status]
-		if(checkboxes.Delivered || checkboxes.notdelivered){
-			this.setState({checkboxes:{...checkboxes}});
-		}else{
+		if (checkboxes.Delivered || checkboxes.notdelivered) {
+			this.setState({ checkboxes: { ...checkboxes } });
+		} else {
 			toast.error('Please keep one selected')
 		}
 	}
+
+	returnBoolean = (order:any,isExist:boolean) => {
+		isExist = (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase());
+		isExist = !isExist ? (order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
+		isExist = !isExist ? (order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
+		isExist = !isExist ? (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) : isExist;
+		!isExist && order.items.map((item: any) => {
+			if (item.images.name.toLowerCase().includes(this.state.search.toLowerCase())) {
+				isExist = true
+			}
+		})
+		return isExist
+	}
+
 	render() {
 		const { orders } = this.state;
 		return (
@@ -122,42 +136,65 @@ export class App extends React.PureComponent<{}, AppState> {
 				<header>
 					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 				</header>
-				{orders ? <div className='results'>Showing {orders.length} results 
+				{orders ? <div className='results'>Showing {orders.length} results
 					<div className="check-boxes">
 						<div>
-							<label htmlFor="delivered">All</label> &nbsp;&nbsp;
-							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true:false} onClick={()=>{
+							<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
+							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
 								this.filterDeliverOrNot(delivererdStatus.Delivered)
 							}} />
 						</div>
 						&nbsp;&nbsp;
 						<div>
 							<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
-							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ?true:false} onClick={(e)=>{
+							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ? true : false} onClick={(e) => {
 								this.filterDeliverOrNot(delivererdStatus.notdelivered)
 							}} />
 						</div>
 					</div>
 				</div> : null}
 				{orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
-				
+
 			</main>
 		)
 	}
 
 	renderOrders = (orders: Order[]) => {
-		const fulfilled = this.state.checkboxes.Delivered?"fulfilled": this.state.checkboxes.notdelivered ? 'not-fulfilled':'both'
-		const both  = this.state.checkboxes.Delivered && this.state.checkboxes.notdelivered;
+		const fulfilled = this.state.checkboxes.Delivered ? "fulfilled" : this.state.checkboxes.notdelivered ? 'not-fulfilled' : 'both'
+		const both = this.state.checkboxes.Delivered && this.state.checkboxes.notdelivered;
 		const filteredOrders = orders
-			.filter((order) =>(
-			(order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) 
-			|| 
-			(order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase())
-			||
-			(order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase())
-			&&
-			!both ? (order.fulfillmentStatus.toLowerCase()).includes(fulfilled.toLowerCase()):''
-			));
+			.filter((order: any) => {
+				if (both) {
+					let isExist = false
+					isExist = this.returnBoolean(order, isExist);
+					return isExist
+				}
+				else {
+					let isExist = false
+					if (fulfilled === 'fulfilled') {
+						if (!this.state.search) {
+							isExist = !isExist ? !(order.fulfillmentStatus.toLowerCase()).includes('not-fulfilled') : isExist;
+						} else {
+							if (order.fulfillmentStatus == 'fulfilled') {
+								isExist = this.returnBoolean(order, isExist);
+							}
+						}
+					}
+					else if (fulfilled === 'not-fulfilled') {
+						if (!this.state.search) {
+							isExist = !isExist ? (order.fulfillmentStatus.toLowerCase()).includes('not') : isExist;
+						} else {
+							if (order.fulfillmentStatus == 'not-fulfilled') {
+								
+								isExist = this.returnBoolean(order, isExist);
+							}
+						}
+					}
+					return isExist
+				}
+			}
+
+			)
 
 		return (
 			<div className='orders'>
@@ -179,7 +216,7 @@ export class App extends React.PureComponent<{}, AppState> {
 							{order.fulfillmentStatus !== 'canceled' &&
 								<a onClick={(e) => {
 									e.stopPropagation()
-									order.fulfillmentStatus === 'fulfilled' ? this.update_item_status(order.id.toString(), 'not-fulfilled'):this.update_item_status(order.id.toString(), 'fulfilled')
+									order.fulfillmentStatus === 'fulfilled' ? this.update_item_status(order.id.toString(), 'not-fulfilled') : this.update_item_status(order.id.toString(), 'fulfilled')
 								}}>Mark as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
 							}
 						</div>
@@ -189,7 +226,7 @@ export class App extends React.PureComponent<{}, AppState> {
 						</div>
 					</div>
 				))}
-			 <ToastContainer />
+				<ToastContainer />
 			</div>
 		)
 	};
