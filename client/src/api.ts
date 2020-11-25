@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Id } from 'react-toastify';
 
 export type Customer = {
 	name: string;
@@ -32,7 +33,7 @@ export type Item = {
 export type ApiClient = {
 	getOrders: () => Promise<Order[]>;
 	getItem: (itemId: string) => Promise<Item>;
-	updateOrderStatus:(orderId:string, status:string) => Promise<Item>
+	updateOrderStatus:(orderId:string, status:string) => Promise<Item>,
 }
 
 export const createApiClient = (): ApiClient => {
@@ -45,7 +46,7 @@ export const createApiClient = (): ApiClient => {
 		},
 		updateOrderStatus: (orderId:string, status:string)=> axios.get(`http://localhost:3232/api/order/update/${orderId}`,{
 			params:{status: status}
-		})
+		}),
 	}
 };
 

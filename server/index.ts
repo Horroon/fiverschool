@@ -24,7 +24,14 @@ app.use((_, res, next) => {
 app.get('/api/orders', (req, res) => {
 	const page = <number>(req.query.page || 1);
 	const orders: any[] = allOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-	res.send(orders);
+	const modifiedOrders = orders.map(order=>{
+		order.items.map((item:any)=>{
+			item.images = products[item.id]
+			return item
+		});
+		return order
+	})
+	res.send(modifiedOrders);
 });
 
 app.get('/api/items/:itemId', (req, res) => {
