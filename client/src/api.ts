@@ -34,6 +34,7 @@ export type ApiClient = {
 	getOrders: () => Promise<Order[]>;
 	getItem: (itemId: string) => Promise<Item>;
 	updateOrderStatus:(orderId:string, status:string) => Promise<Item>,
+	loadMore: (from:number, to:number) => Promise<Item>;
 }
 
 export const createApiClient = (): ApiClient => {
@@ -47,6 +48,12 @@ export const createApiClient = (): ApiClient => {
 		updateOrderStatus: (orderId:string, status:string)=> axios.get(`http://localhost:3232/api/order/update/${orderId}`,{
 			params:{status: status}
 		}),
+		loadMore: (from:number, to: number) => axios.get('http://localhost:3232/api/loadmore/orders',{
+			params:{
+				from:from,
+				to:to
+			}
+		})
 	}
 };
 

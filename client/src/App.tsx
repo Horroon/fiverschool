@@ -8,6 +8,10 @@ import { OrderModal } from './models'
 export type AppState = {
 	orders?: Order[],
 	search: string;
+	limit: {
+		from: number,
+		to: number,
+	},
 	selectedOrder: {
 		image: string,
 		billingInfo: { status: string }
@@ -63,6 +67,10 @@ export class App extends React.PureComponent<{}, AppState> {
 		checkboxes: {
 			Delivered: true,
 			notdelivered: true,
+		},
+		limit: {
+			from: 0,
+			to: 20
 		}
 	};
 
@@ -97,7 +105,6 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	modalOpen = (order: any) => {
-		order.image = "https://source.unsplash.com/1600x900/?nutrition,food"
 		this.setState({ selectedOrder: order })
 		const modalButton = document.getElementById('modalButton');
 		if (modalButton) {
@@ -115,7 +122,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		}
 	}
 
-	returnBoolean = (order:any,isExist:boolean) => {
+	returnBoolean = (order: any, isExist: boolean) => {
 		isExist = (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase());
 		isExist = !isExist ? (order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
 		isExist = !isExist ? (order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
@@ -128,16 +135,33 @@ export class App extends React.PureComponent<{}, AppState> {
 		return isExist
 	}
 
+	loaderMoreRecord = async () => {
+		const { limit } = this.state
+		limit.from = limit.from + 10
+		limit.to = limit.to + 10
+		const response: any = await api.loadMore(limit.from, limit.to);
+		console.log('response came', response)
+		if (response.data.records.length) {
+			this.setState({ orders: response.data.records, limit })
+		} else {
+			toast.warning("No more record found")
+		}
+	}
+
+	showResultFigure = () => {
+
+	}
 	render() {
-		const { orders=[] } = this.state;
+		const { orders = [], limit } = this.state;
 		return (
 			<main>
 				<h1>Orders</h1>
 				<header>
 					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 				</header>
-				{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results:'0'} results
+				{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
 					<div className="check-boxes">
+
 						<div>
 							<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
 							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
@@ -150,6 +174,10 @@ export class App extends React.PureComponent<{}, AppState> {
 							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ? true : false} onClick={(e) => {
 								this.filterDeliverOrNot(delivererdStatus.notdelivered)
 							}} />
+						</div>
+						&nbsp;&nbsp;
+						<div style={{ marginTop: -7 }}>
+							<button className="btn btn-primary btn-sm" onClick={this.loaderMoreRecord}>Load More</button>
 						</div>
 					</div>
 				</div> : null}
@@ -185,7 +213,7 @@ export class App extends React.PureComponent<{}, AppState> {
 							isExist = !isExist ? (order.fulfillmentStatus.toLowerCase()).includes('not') : isExist;
 						} else {
 							if (order.fulfillmentStatus == 'not-fulfilled') {
-								
+
 								isExist = this.returnBoolean(order, isExist);
 							}
 						}
@@ -195,39 +223,41 @@ export class App extends React.PureComponent<{}, AppState> {
 			}
 
 			)
-        return({results: filteredOrders.length, orders:(
-			<div className='orders'>
-				<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></button>
-				<OrderModal order={this.state.selectedOrder} />
-				{filteredOrders.map((order) => (
-					<div className={'orderCard'} onClick={(e) => {
-						e.stopPropagation()
-						this.modalOpen(order)
-					}}>
-						<div className={'generalData'}>
-							<h6>{order.id}</h6>
-							<h4>{order.customer.name}</h4>
-							<h5>Order Placed: {new Date(order.createdDate).toLocaleDateString()}</h5>
+		return ({
+			results: filteredOrders.length, orders: (
+				<div className='orders'>
+					<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></button>
+					<OrderModal order={this.state.selectedOrder} />
+					{filteredOrders.map((order) => (
+						<div className={'orderCard'} onClick={(e) => {
+							e.stopPropagation()
+							this.modalOpen(order)
+						}}>
+							<div className={'generalData'}>
+								<h6>{order.id}</h6>
+								<h4>{order.customer.name}</h4>
+								<h5>Order Placed: {new Date(order.createdDate).toLocaleDateString()}</h5>
+							</div>
+							<div className={'fulfillmentData'}>
+								<h4>{order.itemQuantity} Items</h4>
+								<img src={App.getAssetByStatus(order.fulfillmentStatus)} />
+								{order.fulfillmentStatus !== 'canceled' &&
+									<a onClick={(e) => {
+										e.stopPropagation()
+										order.fulfillmentStatus === 'fulfilled' ? this.update_item_status(order.id.toString(), 'not-fulfilled') : this.update_item_status(order.id.toString(), 'fulfilled')
+									}}>Mark as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
+								}
+							</div>
+							<div className={'paymentData'}>
+								<h4>{order.price.formattedTotalPrice}</h4>
+								<img src={App.getAssetByStatus(order.billingInfo.status)} />
+							</div>
 						</div>
-						<div className={'fulfillmentData'}>
-							<h4>{order.itemQuantity} Items</h4>
-							<img src={App.getAssetByStatus(order.fulfillmentStatus)} />
-							{order.fulfillmentStatus !== 'canceled' &&
-								<a onClick={(e) => {
-									e.stopPropagation()
-									order.fulfillmentStatus === 'fulfilled' ? this.update_item_status(order.id.toString(), 'not-fulfilled') : this.update_item_status(order.id.toString(), 'fulfilled')
-								}}>Mark as {order.fulfillmentStatus === 'fulfilled' ? 'Not Delivered' : 'Delivered'}</a>
-							}
-						</div>
-						<div className={'paymentData'}>
-							<h4>{order.price.formattedTotalPrice}</h4>
-							<img src={App.getAssetByStatus(order.billingInfo.status)} />
-						</div>
-					</div>
-				))}
-				<ToastContainer />
-			</div>
-		)})
+					))}
+					<ToastContainer />
+				</div>
+			)
+		})
 	};
 
 	static getAssetByStatus(status: string) {

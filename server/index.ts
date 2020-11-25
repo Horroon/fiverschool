@@ -63,5 +63,11 @@ app.get('/api/order/update/:orderId', (req, res)=>{
 		
 })
 
+app.get('/api/loadmore/orders', (req,res)=>{
+	const from = parseInt(<string>(req.query.from))
+	const to = parseInt(<string>(req.query.to))
+	res.send({records: allOrders.slice(from, to)})
+})
+
 app.listen(PORT);
 console.log('Listening on port', PORT);
