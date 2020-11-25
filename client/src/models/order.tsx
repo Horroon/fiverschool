@@ -96,12 +96,12 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
                 {
                   order.items.map((quantity, i) => {
                     return <>
-                      <div className="col-md-6 mb-4" style={{marginTop:10}}>
-                        <label>{quantity.images.name}</label>
-                        <input type="text" className="form-control" id="date" placeholder="Date" value={quantity.id} disabled />
+                      <div className="col-md-6 mb-4 mt-10" >
+                        <label>Product Name</label>
+                        <input type="text" className="form-control" id="date" placeholder="Date" value={quantity.images.name} disabled />
                       </div>
 
-                      <div className="col-md-6 mb-4"  style={{marginTop:10}}>
+                      <div className="col-md-6 mb-4 mt-10" >
                         <label>Quantity</label>
                         <input type="text" className="form-control" id="date" placeholder="Date" value={quantity.quantity} disabled />
                       </div>
