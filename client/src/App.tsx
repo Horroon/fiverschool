@@ -138,12 +138,11 @@ export class App extends React.PureComponent<{}, AppState> {
 		return isExist
 	}
 
-	loaderMoreRecord = async () => {
+	loaderMoreRecord = async (sign:string) => {
 		const { limit } = this.state
-		limit.from = limit.from + 10
-		limit.to = limit.to + 10
+		limit.from = sign == '+' ? limit.from + 10 : limit.from - 10;
+		limit.to =  sign == '+' ? limit.to + 10 : limit.to - 10
 		const response: any = await api.loadMore(limit.from, limit.to);
-		console.log('response came', response)
 		if (response.data.records.length) {
 			this.setState({ orders: response.data.records, limit })
 		} else {
@@ -152,6 +151,7 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 	render() {
 		const { orders = [], limit, isNewProduct } = this.state;
+		const isPrv = limit.from>0 ? false : true 
 		if (isNewProduct) {
 			return <AddProduct  />
 		} else {
@@ -181,8 +181,12 @@ export class App extends React.PureComponent<{}, AppState> {
 								}} />
 							</div>
 							&nbsp;&nbsp;
+							<div style={{ marginTop: -7 }}>
+								<button className="btn btn-primary btn-sm" onClick={()=>this.loaderMoreRecord('-')} disabled={isPrv}>Previous</button>
+							</div>
+							&nbsp;&nbsp;
 						<div style={{ marginTop: -7 }}>
-								<button className="btn btn-primary btn-sm" onClick={this.loaderMoreRecord}>Load More</button>
+								<button className="btn btn-primary btn-sm" onClick={()=>this.loaderMoreRecord('+')}>Next</button>
 							</div>
 						</div>
 					</div> : null}

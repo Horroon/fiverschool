@@ -19,7 +19,7 @@ export const AddProduct: React.FC = (): ReactElement => {
       item.images.large = largeImage;
       item.images.medium = mediumImage;
       item.images.small = smallImage
-		  const response:any = await api.addProduct(item)
+      const response:any = await api.addProduct(item)
       if(response.data.status){
         toast.success('Product added')
       }else{

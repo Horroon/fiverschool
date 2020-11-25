@@ -73,7 +73,6 @@ app.get('/api/loadmore/orders', (req,res)=>{
 app.get('/api/product/add', (req, res)=>{
 	const item:any = req.query.item
 	// create db connection here
-	item.id = 'lskdfjglsj45i30945i3dfgmdl34905i';
 	res.send({status: true})
 })
 app.listen(PORT);
