@@ -29,12 +29,14 @@ export type Item = {
 	price: number;
 	image: string;
 }
+export type newItemFace = { name: string, price: string, images: { original: string, large: string, medium: string, small: string } }
 
 export type ApiClient = {
 	getOrders: () => Promise<Order[]>;
 	getItem: (itemId: string) => Promise<Item>;
 	updateOrderStatus:(orderId:string, status:string) => Promise<Item>,
 	loadMore: (from:number, to:number) => Promise<Item>;
+	addProduct:(item:newItemFace) => Promise<Item>;
 }
 
 export const createApiClient = (): ApiClient => {
@@ -52,6 +54,11 @@ export const createApiClient = (): ApiClient => {
 			params:{
 				from:from,
 				to:to
+			}
+		}),
+		addProduct: (item:newItemFace) => axios.get('http://localhost:3232/api/product/add',{
+			params:{
+				item
 			}
 		})
 	}

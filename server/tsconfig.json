@@ -20,6 +20,6 @@
   },
   "include": [
 	  "types.d.ts",
-	  "*.ts", "../client/src/models/order.tsx"
+	  "*.ts", "../client/src/models/order.tsx", "../client/src/pages/add.product.tsx"
 	]
 }

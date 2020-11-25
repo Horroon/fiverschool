@@ -3,7 +3,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.scss';
 import { createApiClient, Order } from './api';
-import { OrderModal } from './models'
+import { OrderModal } from './models';
+import { AddProduct } from './pages/add.product';
 
 export type AppState = {
 	orders?: Order[],
@@ -33,7 +34,8 @@ export type AppState = {
 	checkboxes: {
 		Delivered: boolean,
 		notdelivered: boolean,
-	}
+	},
+	isNewProduct: boolean
 }
 
 enum delivererdStatus {
@@ -71,7 +73,8 @@ export class App extends React.PureComponent<{}, AppState> {
 		limit: {
 			from: 0,
 			to: 20
-		}
+		},
+		isNewProduct: false
 	};
 
 	searchDebounce: any = null;
@@ -147,44 +150,47 @@ export class App extends React.PureComponent<{}, AppState> {
 			toast.warning("No more record found")
 		}
 	}
-
-	showResultFigure = () => {
-
-	}
 	render() {
-		const { orders = [], limit } = this.state;
-		return (
-			<main>
-				<h1>Orders</h1>
-				<header>
-					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
-				</header>
-				{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
+		const { orders = [], limit, isNewProduct } = this.state;
+		if (isNewProduct) {
+			return <AddProduct  />
+		} else {
+			return (
+				<main>
+					<h1>Orders</h1>
+					<header>
+						<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
+					</header>
+					<div>
+						<button className="btn btn-primary btn-sm" onClick={()=>this.setState({isNewProduct: true})}>Add Product</button>
+					</div>
+					{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
 					<div className="check-boxes">
 
-						<div>
-							<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
+							<div>
+								<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
 							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
-								this.filterDeliverOrNot(delivererdStatus.Delivered)
-							}} />
-						</div>
-						&nbsp;&nbsp;
+									this.filterDeliverOrNot(delivererdStatus.Delivered)
+								}} />
+							</div>
+							&nbsp;&nbsp;
 						<div>
-							<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
+								<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
 							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ? true : false} onClick={(e) => {
-								this.filterDeliverOrNot(delivererdStatus.notdelivered)
-							}} />
-						</div>
-						&nbsp;&nbsp;
+									this.filterDeliverOrNot(delivererdStatus.notdelivered)
+								}} />
+							</div>
+							&nbsp;&nbsp;
 						<div style={{ marginTop: -7 }}>
-							<button className="btn btn-primary btn-sm" onClick={this.loaderMoreRecord}>Load More</button>
+								<button className="btn btn-primary btn-sm" onClick={this.loaderMoreRecord}>Load More</button>
+							</div>
 						</div>
-					</div>
-				</div> : null}
-				{orders ? this.renderOrders(orders).orders : <h2>Loading...</h2>}
+					</div> : null}
+					{orders ? this.renderOrders(orders).orders : <h2>Loading...</h2>}
 
-			</main>
-		)
+				</main>
+			)
+		}
 	}
 
 	renderOrders = (orders: Order[]) => {

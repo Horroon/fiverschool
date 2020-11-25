@@ -22,6 +22,7 @@ app.use((_, res, next) => {
 });
 
 app.get('/api/orders', (req, res) => {
+	console.log('data length ', allOrders.length)
 	const page = <number>(req.query.page || 1);
 	const orders: any[] = allOrders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 	const modifiedOrders = orders.map(order=>{
@@ -69,5 +70,11 @@ app.get('/api/loadmore/orders', (req,res)=>{
 	res.send({records: allOrders.slice(from, to)})
 })
 
+app.get('/api/product/add', (req, res)=>{
+	const item:any = req.query.item
+	// create db connection here
+	item.id = 'lskdfjglsj45i30945i3dfgmdl34905i';
+	res.send({status: true})
+})
 app.listen(PORT);
 console.log('Listening on port', PORT);
