@@ -129,14 +129,14 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	render() {
-		const { orders } = this.state;
+		const { orders=[] } = this.state;
 		return (
 			<main>
 				<h1>Orders</h1>
 				<header>
 					<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 				</header>
-				{orders ? <div className='results'>Showing {orders.length} results
+				{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results:'0'} results
 					<div className="check-boxes">
 						<div>
 							<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
@@ -153,7 +153,7 @@ export class App extends React.PureComponent<{}, AppState> {
 						</div>
 					</div>
 				</div> : null}
-				{orders ? this.renderOrders(orders) : <h2>Loading...</h2>}
+				{orders ? this.renderOrders(orders).orders : <h2>Loading...</h2>}
 
 			</main>
 		)
@@ -195,8 +195,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			}
 
 			)
-
-		return (
+        return({results: filteredOrders.length, orders:(
 			<div className='orders'>
 				<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></button>
 				<OrderModal order={this.state.selectedOrder} />
@@ -228,7 +227,7 @@ export class App extends React.PureComponent<{}, AppState> {
 				))}
 				<ToastContainer />
 			</div>
-		)
+		)})
 	};
 
 	static getAssetByStatus(status: string) {
