@@ -35,7 +35,11 @@ export type AppState = {
 		Delivered: boolean,
 		notdelivered: boolean,
 	},
-	isNewProduct: boolean
+	isNewProduct: boolean,
+	sort:{
+		byName:boolean,
+		byPrice:boolean
+	}
 }
 
 enum delivererdStatus {
@@ -74,7 +78,11 @@ export class App extends React.PureComponent<{}, AppState> {
 			from: 0,
 			to: 20
 		},
-		isNewProduct: false
+		isNewProduct: false,
+		sort:{
+			byName:true,
+			byPrice: true,
+		}
 	};
 
 	searchDebounce: any = null;
@@ -138,10 +146,10 @@ export class App extends React.PureComponent<{}, AppState> {
 		return isExist
 	}
 
-	loaderMoreRecord = async (sign:string) => {
+	loaderMoreRecord = async (sign: string) => {
 		const { limit } = this.state
 		limit.from = sign == '+' ? limit.from + 10 : limit.from - 10;
-		limit.to =  sign == '+' ? limit.to + 10 : limit.to - 10
+		limit.to = sign == '+' ? limit.to + 10 : limit.to - 10
 		const response: any = await api.loadMore(limit.from, limit.to);
 		if (response.data.records.length) {
 			this.setState({ orders: response.data.records, limit })
@@ -149,11 +157,32 @@ export class App extends React.PureComponent<{}, AppState> {
 			toast.warning("No more record found")
 		}
 	}
+
+	sortMethod = (item1: any, item2: any, sorttype:any) => {
+		if (sorttype.byPrice && !sorttype.byName) {
+			if (item1.price.total > item2.price.total) {
+				return -1;
+			}
+			if (item1.price.total < item2.price.total) {
+				return 1;
+			}
+		}
+		else if (sorttype.byName && !sorttype.byPrice) {
+			if (item1.customer.name < item2.customer.name) {
+				return -1;
+			}
+			if (item1.customer.name > item2.customer.name) {
+				return 1;
+			}
+		}
+		return 0;
+	}
 	render() {
-		const { orders = [], limit, isNewProduct } = this.state;
-		const isPrv = limit.from>0 ? false : true 
+		const { orders = [], limit, isNewProduct, sort } = this.state;
+		console.log('orders ', orders, sort)
+		const isPrv = limit.from > 0 ? false : true
 		if (isNewProduct) {
-			return <AddProduct  />
+			return <AddProduct />
 		} else {
 			return (
 				<main>
@@ -162,34 +191,49 @@ export class App extends React.PureComponent<{}, AppState> {
 						<input type="search" placeholder="Search" onChange={(e) => this.onSearch(e.target.value)} />
 					</header>
 					<div>
-						<button className="btn btn-primary btn-sm" onClick={()=>this.setState({isNewProduct: true})}>Add Product</button>
+						<button className="btn btn-primary btn-sm" onClick={() => this.setState({ isNewProduct: true })}>Add Product</button>
 					</div>
-					{orders ? <div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
+					{orders ?
+						<div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
 					<div className="check-boxes">
-
+								<div>
+									<label htmlFor="delivered">Sort By Name</label> &nbsp;&nbsp;
+								<input type="checkbox" name="all" id="all" value="Delivered" checked={sort.byName} onClick={() => {
+										sort.byName = !sort.byName
+										this.setState({sort: {...sort}})
+									}} />
+								</div>
+								<div>
+									<label htmlFor="delivered">Sort By Price</label> &nbsp;&nbsp;
+								<input type="checkbox" name="all" id="all" value="Delivered" checked={sort.byPrice} onClick={() => {
+										sort.byPrice = !sort.byPrice
+										this.setState({sort:{...sort}})
+									}} />
+								</div>
+								&nbsp;&nbsp;
 							<div>
-								<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
-							<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
-									this.filterDeliverOrNot(delivererdStatus.Delivered)
-								}} />
-							</div>
-							&nbsp;&nbsp;
-						<div>
-								<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
-							<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ? true : false} onClick={(e) => {
-									this.filterDeliverOrNot(delivererdStatus.notdelivered)
-								}} />
-							</div>
-							&nbsp;&nbsp;
+									<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
+								<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
+										this.filterDeliverOrNot(delivererdStatus.Delivered)
+									}} />
+								</div>
+								&nbsp;&nbsp;
+							<div>
+									<label htmlFor="notdelivered">Delivered</label>&nbsp;&nbsp;
+								<input type="checkbox" name="notdelivered" id="notdelivered" value="notdelivered" checked={this.state.checkboxes.notdelivered ? true : false} onClick={(e) => {
+										this.filterDeliverOrNot(delivererdStatus.notdelivered)
+									}} />
+								</div>
+								&nbsp;&nbsp;
+								<div style={{ marginTop: -7 }}>
+									<button className="btn btn-primary btn-sm" onClick={() => this.loaderMoreRecord('-')} disabled={isPrv}>Previous</button>
+								</div>
+								&nbsp;&nbsp;
 							<div style={{ marginTop: -7 }}>
-								<button className="btn btn-primary btn-sm" onClick={()=>this.loaderMoreRecord('-')} disabled={isPrv}>Previous</button>
+									<button className="btn btn-primary btn-sm" onClick={() => this.loaderMoreRecord('+')}>Next</button>
+								</div>
 							</div>
-							&nbsp;&nbsp;
-						<div style={{ marginTop: -7 }}>
-								<button className="btn btn-primary btn-sm" onClick={()=>this.loaderMoreRecord('+')}>Next</button>
-							</div>
-						</div>
-					</div> : null}
+						</div> : null}
 					{orders ? this.renderOrders(orders).orders : <h2>Loading...</h2>}
 
 				</main>
@@ -233,12 +277,22 @@ export class App extends React.PureComponent<{}, AppState> {
 			}
 
 			)
+		const compare = (a: any, b: any) => {
+			if (a.price.total > b.price.total) {
+				return -1;
+			}
+			if (a.price.total < b.price.total) {
+				return 1;
+			}
+			return 0;
+		}
+		const sortedResult = filteredOrders.sort((a,b)=>this.sortMethod(a,b,this.state.sort));
 		return ({
 			results: filteredOrders.length, orders: (
 				<div className='orders'>
 					<button style={{ display: 'none' }} id="modalButton" type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter"></button>
 					<OrderModal order={this.state.selectedOrder} />
-					{filteredOrders.map((order) => (
+					{sortedResult.map((order) => (
 						<div className={'orderCard'} onClick={(e) => {
 							e.stopPropagation()
 							this.modalOpen(order)
