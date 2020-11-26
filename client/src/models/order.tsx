@@ -73,7 +73,7 @@ export const OrderModal: React.FC<{ order: OrderItemFace }> = React.memo(({ orde
             <form className="needs-validation">
               <div className="form-row">
                 <div className="col-md-6 mb-4 mt-4">
-                  <label>currency</label>
+                  <label>Currency</label>
                   <input type="text" className="form-control" id="validationCustom01" placeholder="First name" value={order.currency} disabled />
                 </div>
                 <div className="col-md-6 mb-4 mt-4">

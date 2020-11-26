@@ -36,10 +36,10 @@ export type AppState = {
 		notdelivered: boolean,
 	},
 	isNewProduct: boolean,
-	sort:{
-		byName:boolean,
-		byPrice:boolean,
-		byDate:boolean,
+	sort: {
+		byName: boolean,
+		byPrice: boolean,
+		byDate: boolean,
 	}
 }
 
@@ -80,8 +80,8 @@ export class App extends React.PureComponent<{}, AppState> {
 			to: 20
 		},
 		isNewProduct: false,
-		sort:{
-			byName:true,
+		sort: {
+			byName: true,
 			byPrice: true,
 			byDate: true,
 		}
@@ -160,7 +160,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		}
 	}
 
-	sortMethod = (item1: any, item2: any, sorttype:any) => {
+	sortMethod = (item1: any, item2: any, sorttype: any) => {
 		if (sorttype.byPrice && !sorttype.byName) {
 			if (item1.price.total > item2.price.total) {
 				return -1;
@@ -187,6 +187,32 @@ export class App extends React.PureComponent<{}, AppState> {
 		}
 		return 0;
 	}
+
+	handleSort = (e: any) => {
+		const { target: { value } } = e
+		const { sort } = this.state
+		if (value == "no") {
+			sort.byDate = false;
+			sort.byName = false;
+			sort.byPrice = false;
+		} else if (value == 'd') {
+			sort.byDate = true;
+			sort.byName = false;
+			sort.byPrice = false;
+
+		} else if (value == 'p') {
+			sort.byDate = false;
+			sort.byName = false;
+			sort.byPrice = true;
+
+		} else if (value == 'n') {
+			sort.byDate = false;
+			sort.byName = true;
+			sort.byPrice = false;
+		}
+		this.setState({ sort: { ...sort } })
+	}
+
 	render() {
 		const { orders = [], limit, isNewProduct, sort } = this.state;
 		const isPrv = limit.from > 0 ? false : true
@@ -206,35 +232,8 @@ export class App extends React.PureComponent<{}, AppState> {
 						<div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
 					 &nbsp;&nbsp;
 					<div className="check-boxes">
+								
 								<div>
-								<label htmlFor="delivered">Sort By Date</label> &nbsp;&nbsp;
-								<input type="radio" name="sort" id="all" value="Delivered"  onClick={() => {
-										sort.byDate = true;
-										sort.byName= false;
-										sort.byPrice = false;
-										this.setState({sort: {...sort}})
-									}} />
-								</div>
-								<div>
-									<label htmlFor="delivered">Sort By Name</label> &nbsp;&nbsp;
-								<input type="radio" name="sort" id="all" value="Delivered"  onClick={() => {
-										sort.byDate = false;
-										sort.byName= true;
-										sort.byPrice = false;
-										this.setState({sort: {...sort}})
-									}} />
-								</div>
-								<div>
-									<label htmlFor="delivered">Sort By Price</label> &nbsp;&nbsp;
-								<input type="radio" name="sort" id="all" value="Delivered" onClick={() => {
-										sort.byDate = false;
-										sort.byName= false;
-										sort.byPrice = true;
-										this.setState({sort:{...sort}})
-									}} />
-								</div>
-								&nbsp;
-							<div>
 									<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
 								<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
 										this.filterDeliverOrNot(delivererdStatus.Delivered)
@@ -252,8 +251,18 @@ export class App extends React.PureComponent<{}, AppState> {
 									<button className="btn btn-primary btn-sm" onClick={() => this.loaderMoreRecord('-')} disabled={isPrv}>Previous</button>
 								</div>
 								&nbsp;&nbsp;
-							<div style={{ marginTop: -7 }}>
+								<div style={{ marginTop: -7 }}>
 									<button className="btn btn-primary btn-sm" onClick={() => this.loaderMoreRecord('+')}>Next</button>
+								</div>
+								
+								&nbsp;&nbsp;
+								<div className="form-group " style={{marginTop: -10}}>
+									<select className="form-control" onChange={this.handleSort}>
+										<option value='no'>No Sort</option>
+										<option value='d'>By Date</option>
+										<option value='n'>By Name</option>
+										<option value='p'>By Price</option>
+									</select>
 								</div>
 							</div>
 						</div> : null}
@@ -309,7 +318,7 @@ export class App extends React.PureComponent<{}, AppState> {
 			}
 			return 0;
 		}
-		const sortedResult = filteredOrders.sort((a,b)=>this.sortMethod(a,b,this.state.sort));
+		const sortedResult = filteredOrders.sort((a, b) => this.sortMethod(a, b, this.state.sort));
 		return ({
 			results: filteredOrders.length, orders: (
 				<div className='orders'>
