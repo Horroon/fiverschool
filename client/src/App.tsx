@@ -38,7 +38,8 @@ export type AppState = {
 	isNewProduct: boolean,
 	sort:{
 		byName:boolean,
-		byPrice:boolean
+		byPrice:boolean,
+		byDate:boolean,
 	}
 }
 
@@ -82,6 +83,7 @@ export class App extends React.PureComponent<{}, AppState> {
 		sort:{
 			byName:true,
 			byPrice: true,
+			byDate: true,
 		}
 	};
 
@@ -175,11 +177,18 @@ export class App extends React.PureComponent<{}, AppState> {
 				return 1;
 			}
 		}
+		else if (sorttype.byDate && !sorttype.byName && !sorttype.byPrice) {
+			if (item1.createdDate < item2.createdDate) {
+				return -1;
+			}
+			if (new Date(item1.createdDate) > new Date(item2.createdDate)) {
+				return 1;
+			}
+		}
 		return 0;
 	}
 	render() {
 		const { orders = [], limit, isNewProduct, sort } = this.state;
-		console.log('orders ', orders, sort)
 		const isPrv = limit.from > 0 ? false : true
 		if (isNewProduct) {
 			return <AddProduct />
@@ -195,22 +204,36 @@ export class App extends React.PureComponent<{}, AppState> {
 					</div>
 					{orders ?
 						<div className='results'>Showing {orders ? this.renderOrders(orders).results == orders.length ? `from ${limit.from + 1} to ${limit.to}` : this.renderOrders(orders).results : '0'} results
+					 &nbsp;&nbsp;
 					<div className="check-boxes">
 								<div>
+								<label htmlFor="delivered">Sort By Date</label> &nbsp;&nbsp;
+								<input type="radio" name="sort" id="all" value="Delivered"  onClick={() => {
+										sort.byDate = true;
+										sort.byName= false;
+										sort.byPrice = false;
+										this.setState({sort: {...sort}})
+									}} />
+								</div>
+								<div>
 									<label htmlFor="delivered">Sort By Name</label> &nbsp;&nbsp;
-								<input type="checkbox" name="all" id="all" value="Delivered" checked={sort.byName} onClick={() => {
-										sort.byName = !sort.byName
+								<input type="radio" name="sort" id="all" value="Delivered"  onClick={() => {
+										sort.byDate = false;
+										sort.byName= true;
+										sort.byPrice = false;
 										this.setState({sort: {...sort}})
 									}} />
 								</div>
 								<div>
 									<label htmlFor="delivered">Sort By Price</label> &nbsp;&nbsp;
-								<input type="checkbox" name="all" id="all" value="Delivered" checked={sort.byPrice} onClick={() => {
-										sort.byPrice = !sort.byPrice
+								<input type="radio" name="sort" id="all" value="Delivered" onClick={() => {
+										sort.byDate = false;
+										sort.byName= false;
+										sort.byPrice = true;
 										this.setState({sort:{...sort}})
 									}} />
 								</div>
-								&nbsp;&nbsp;
+								&nbsp;
 							<div>
 									<label htmlFor="delivered">Not Delivered</label> &nbsp;&nbsp;
 								<input type="checkbox" name="all" id="all" value="Delivered" checked={this.state.checkboxes.Delivered ? true : false} onClick={() => {
