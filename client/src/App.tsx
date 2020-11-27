@@ -136,12 +136,12 @@ export class App extends React.PureComponent<{}, AppState> {
 	}
 
 	returnBoolean = (order: any, isExist: boolean) => {
-		isExist = (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase());
-		isExist = !isExist ? (order.fulfillmentStatus.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
-		isExist = !isExist ? (order.billingInfo.status.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
-		isExist = !isExist ? (order.customer.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) : isExist;
+		isExist = (order?.customer?.name.toLowerCase() + order.id).includes(this.state.search.toLowerCase());
+		isExist = !isExist ? (order?.fulfillmentStatus?.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
+		isExist = !isExist ? (order?.billingInfo?.status?.toLowerCase()).includes(this.state.search.toLowerCase()) : isExist;
+		isExist = !isExist ? (order?.customer?.name?.toLowerCase() + order.id).includes(this.state.search.toLowerCase()) : isExist;
 		!isExist && order.items.map((item: any) => {
-			if (item.images.name.toLowerCase().includes(this.state.search.toLowerCase())) {
+			if (item?.images?.name.toLowerCase().includes(this.state.search.toLowerCase())) {
 				isExist = true
 			}
 		})
